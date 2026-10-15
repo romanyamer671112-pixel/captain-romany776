@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captain Romany - Fitness & Nutrition Platform</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase Official JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg-black: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --primary-red: #e60000;
+            --accent-yellow: #ffcc00;
+            --text-white: #ffffff;
+            --text-muted: #b3b3b3;
+            --border-color: #333333;
+        }
+
+        [dir="ltr"] { text-align: left; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-black); color: var(--text-white); line-height: 1.6; padding-bottom: 50px; }
+
+        .top-bar {
+            background: linear-gradient(90deg, #1a1a1a, #262626);
+            border-bottom: 2px solid var(--primary-red);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .social-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .social-links { display: flex; align-items: center; gap: 10px; }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .social-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
+
+        .btn-whatsapp { background-color: #25D366; }
+        .btn-tiktok { background-color: #000000; border: 1px solid #333; }
+        .btn-facebook { background-color: #1877F2; }
+        .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+        .lang-btn {
+            background-color: var(--accent-yellow);
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .lang-btn:hover { background-color: #e6b800; }
+
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .card-header {
+            border-bottom: 2px solid var(--primary-red);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title { color: var(--accent-yellow); font-size: 1.4rem; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+        label { font-size: 0.95rem; color: var(--text-muted); font-weight: 600; }
+
+        input, select, textarea {
+            background-color: #000;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-yellow); }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background-color: var(--primary-red); color: #fff; }
+        .btn-primary:hover { background-color: #cc0000; }
+        .btn-accent { background-color: var(--accent-yellow); color: #000; }
+        .btn-accent:hover { background-color: #d9b300; }
+        .btn-danger { background-color: #990000; color: #fff; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background-color: #262626;
+            color: var(--text-white);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active { background-color: var(--primary-red); color: #fff; font-weight: bold; }
+
+        .hidden { display: none !important; }
+
+        .banner-alert {
+            background-color: rgba(230, 0, 0, 0.2);
+            border: 1px solid var(--primary-red);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--accent-yellow);
+            margin-bottom: 15px;
+        }
+
+        .subscriber-box {
+            background: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .subscriber-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #222;
+            padding: 12px 15px;
+            border-radius: 6px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .subscriber-body {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .info-group { background: #181818; padding: 15px; border-radius: 6px; border: 1px solid #282828; }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #222; }
+        .macro-counters { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
+        .macro-box { background: #111; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color); }
+        .macro-val { font-size: 1.3rem; font-weight: bold; color: var(--accent-yellow); }
+        .img-preview { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-yellow); }
+        .loading-spinner { color: var(--accent-yellow); text-align: center; font-weight: bold; padding: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar Header -->
+    <div class="top-bar">
+        <div class="social-container">
+            <span style="color:var(--accent-yellow); font-weight:bold; font-size:0.9rem;" data-translate="connectWithUs">تواصل معنا:</span>
+            <div class="social-links">
+                <a href="https://wa.me/201044578792" target="_blank" class="social-btn btn-whatsapp"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.tiktok.com/@romanyamer1212712?_r=1&_t=ZS-9AYGYvXN2Hq" target="_blank" class="social-btn btn-tiktok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.facebook.com/share/1HVK6FUCvm/?mibextid=wwXIfr" target="_blank" class="social-btn btn-facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://instagram.com/romyo71200?obrf=ZDV4NXZzYnp3b3Zw&utm_source=qr" target="_blank" class="social-btn btn-instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()"><i class="fas fa-globe"></i> <span id="langText">English</span></button>
+    </div>
+
+    <div class="container">
+
+        <!-- Login / Register Section -->
+        <div id="authSection" class="card">
+            <div class="card-header">
+                <h2 class="card-title" data-translate="authTitle">دخول / تسجيل المشتركين</h2>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchAuthMode('login')" id="tabLogin" data-translate="tabLogin">تسجيل الدخول</button>
+                <button class="tab-btn" onclick="switchAuthMode('register')" id="tabRegister" data-translate="tabRegister">حساب جديد</button>
+                <button class="tab-btn" onclick="switchAuthMode('admin')" id="tabAdmin" data-translate="tabAdmin">دخول الكابتن</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label data-translate="lblPhone">رقم الموبايل</label>
+                        <input type="tel" id="loginPhone" required placeholder="01012345678">
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblPassword">كلمة السر</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                </div>
+                <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="margin-top: 15px; width: 100%;" data-translate="btnLogin">دخول</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label data-translate="lblRegName">الاسم الكامل</label>
+                        <input type="text" id="regName" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblRegPhone">رقم الموبايل (اسم المستخدم)</label>
+                        <input type="tel" id="regPhone" required placeholder="01012345678">
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblRegPass">كلمة السر</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblGender">النوع</label>
+                        <select id="regGender">
+                            <option value="male" data-translate="optMale">ذكر</option>
+                            <option value="female" data-translate="optFemale">أنثى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblAge">السن (بالسنوات)</label>
+                        <input type="number" id="regAge" required min="10" max="90">
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblHeight">الطول (سم)</label>
+                        <input type="number" id="regHeight" required min="100" max="230">
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblWeight">الوزن (كجم)</label>
+                        <input type="number" id="regWeight" required min="30" max="250">
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblGoal">الهدف من التمرين</label>
+                        <select id="regGoal">
+                            <option value="weight_loss" data-translate="goalLoss">نقص وزن</option>
+                            <option value="muscle_gain" data-translate="goalMuscle">بناء عضلات</option>
+                            <option value="weight_gain" data-translate="goalWeightGain">زيادة وزن</option>
+                            <option value="fitness" data-translate="goalFitness">لياقة بدنية العامة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblPlan">مدة الاشتراك</label>
+                        <select id="regPlan">
+                            <option value="1" data-translate="plan1">شهر واحد</option>
+                            <option value="2" data-translate="plan2">شهرين</option>
+                            <option value="3" data-translate="plan3">3 أشهر</option>
+                            <option value="6" data-translate="plan6">6 أشهر</option>
+                            <option value="12" data-translate="plan12">سنة كاملة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblPhoto">صورة شخصية / التقدم (اختياري)</label>
+                        <input type="file" id="regPhoto" accept="image/*">
+                    </div>
+                </div>
+                <button type="submit" id="regSubmitBtn" class="btn btn-accent" style="margin-top: 15px; width: 100%;" data-translate="btnRegister">تقديم طلب الاشتراك</button>
+            </form>
+
+            <!-- Admin Login Form -->
+            <form id="adminLoginForm" class="hidden" onsubmit="handleAdminLogin(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label data-translate="adminEmailLbl">إيميل الكابتن</label>
+                        <input type="email" id="adminEmail" value="romany@admin.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="lblPassword">كلمة السر</label>
+                        <input type="password" id="adminPassword" required placeholder="أدخل كلمة السر">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px; width: 100%;" data-translate="adminLoginBtn">دخول لوحة التحكم</button>
+            </form>
+        </div>
+
+        <!-- Member Dashboard -->
+        <div id="memberDashboard" class="hidden">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-user-circle"></i> <span data-translate="welcomeMsg">أهلاً بك</span> <span id="memberNameDisplay"></span></h2>
+                    <button class="btn btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-translate="logoutBtn">خروج</span></button>
+                </div>
+
+                <div class="banner-alert" id="renewalAlert">
+                    <i class="fas fa-bell"></i> <span id="renewalAlertText">تذكير: يرجى متابعة تاريخ تجديد الاشتراك مع الكابتن.</span>
+                </div>
+
+                <div class="card" style="background:#111;">
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-calendar-alt"></i> <span data-translate="subCardTitle">تفاصيل اشتراكك</span></h3>
+                    <div class="info-row">
+                        <span data-translate="startDateLbl">تاريخ الاشتراك:</span>
+                        <b id="memberStartDate" style="color:var(--text-white);"></b>
+                    </div>
+                    <div class="info-row" style="border-bottom:none;">
+                        <span data-translate="endDateLbl">تاريخ انتهاء الاشتراك:</span>
+                        <b id="memberEndDate" style="color:var(--accent-yellow);"></b>
+                    </div>
+                </div>
+
+                <div class="card" style="background:#111;">
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-utensils"></i> <span data-translate="dietTitle">النظام الغذائي</span></h3>
+                    <div id="dietContent">لا يوجد نظام مضاف بعد.</div>
+                    
+                    <hr style="border-color:#333; margin:15px 0;">
+                    
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-dumbbell"></i> <span data-translate="workoutTitle">نظام التمرين</span></h3>
+                    <div id="workoutContent">لا يوجد نظام مضاف بعد.</div>
+
+                    <hr style="border-color:#333; margin:15px 0;">
+
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-sticky-note"></i> <span data-translate="coachNotesTitle">ملاحظات الكابتن</span></h3>
+                    <div id="coachNotesContent">لا توجد ملاحظات حالياً.</div>
+                </div>
+
+                <!-- Meal Swapper & AI Macro Counter -->
+                <div class="card" style="background:#111;">
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-calculator"></i> <span data-translate="aiCalcTitle">حاسبة السعرات والماكروز واستبدال الوجبات</span></h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label data-translate="foodInputLbl">اكتب الطعام/الشراب المأكول</label>
+                            <input type="text" id="foodInput" placeholder="مثال: 200 جرام صدر دجاج، 150 جرام أرز">
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" style="margin-top:10px;" onclick="calculateMacros()"><i class="fas fa-brain"></i> <span data-translate="calcBtn">حساب السعرات</span></button>
+
+                    <div class="macro-counters">
+                        <div class="macro-box"><div data-translate="proteinLbl">بروتين</div><div class="macro-val" id="valProtein">0g</div></div>
+                        <div class="macro-box"><div data-translate="carbsLbl">كارب</div><div class="macro-val" id="valCarbs">0g</div></div>
+                        <div class="macro-box"><div data-translate="fatsLbl">دهون</div><div class="macro-val" id="valFats">0g</div></div>
+                        <div class="macro-box"><div data-translate="calsLbl">سعرات</div><div class="macro-val" id="valCalories">0 kcal</div></div>
+                    </div>
+
+                    <hr style="border-color:#333; margin:15px 0;">
+                    
+                    <h4 data-translate="swapTitle">تبديل وجبة غير مفضلة</h4>
+                    <div class="form-grid" style="margin-top:10px;">
+                        <div class="form-group">
+                            <label data-translate="swapInputLbl">الوجبة المراد استبدالها</label>
+                            <input type="text" id="swapInput" placeholder="مثال: بيض مسلوق">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top:10px;" onclick="swapMeal()"><i class="fas fa-exchange-alt"></i> <span data-translate="swapBtn">اقتراح بديل بنفس القيم</span></button>
+                    <div id="swapResult" style="margin-top:10px; color:var(--accent-yellow);"></div>
+                </div>
+
+                <!-- Member Notes Section -->
+                <div class="card" style="background:#111;">
+                    <h3 style="color:var(--accent-yellow); margin-bottom:10px;"><i class="fas fa-pen"></i> <span data-translate="myNotesTitle">ملاحظاتي للكابتن</span></h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label data-translate="permNoteLbl">ملاحظة دائمة</label>
+                            <textarea id="permNote" rows="2" placeholder="أي حساسية أو إصابة مسبقة..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label data-translate="dailyNoteLbl">ملاحظة اليومية (شرح عن يومك الرياضي)</label>
+                            <textarea id="dailyNote" rows="2" placeholder="كيف كان تمرين اليوم والوجبات..."></textarea>
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" style="margin-top:10px;" onclick="saveMemberNotes()" data-translate="saveNotesBtn">حفظ الملاحظات</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Captain / Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-user-shield"></i> <span data-translate="adminPanelTitle">لوحة تحكم الكابتن روماني</span></h2>
+                    <button class="btn btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-translate="logoutBtn">خروج</span></button>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 data-translate="subscribersListTitle">إدارة المشتركين</h3>
+                    <button class="btn btn-accent" onclick="renderAdminList()"><i class="fas fa-sync-alt"></i> تحديث القائمة</button>
+                </div>
+                
+                <div id="adminSubscribersList">
+                    <!-- Dynamic subscribers -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://mtasqcyoyjnftplzkebt.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_zrOLzysseMIYN0RJvkz8Fw_rA5aEwQj";
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentLang = 'ar';
+        let currentUser = null;
+
+        const translations = {
+            ar: {
+                connectWithUs: "تواصل معنا:",
+                authTitle: "دخول / تسجيل المشتركين",
+                tabLogin: "تسجيل الدخول",
+                tabRegister: "حساب جديد",
+                tabAdmin: "دخول الكابتن",
+                lblPhone: "رقم الموبايل",
+                lblPassword: "كلمة السر",
+                btnLogin: "دخول",
+                btnRegister: "تقديم طلب الاشتراك",
+                adminEmailLbl: "إيميل الكابتن",
+                adminLoginBtn: "دخول لوحة التحكم",
+                lblRegName: "الاسم الكامل",
+                lblRegPhone: "رقم الموبايل (اسم المستخدم)",
+                lblRegPass: "كلمة السر",
+                lblGender: "النوع",
+                optMale: "ذكر",
+                optFemale: "أنثى",
+                lblAge: "السن (بالسنوات)",
+                lblHeight: "الطول (سم)",
+                lblWeight: "الوزن (كجم)",
+                lblGoal: "الهدف من التمرين",
+                goalLoss: "نقص وزن",
+                goalMuscle: "بناء عضلات",
+                goalWeightGain: "زيادة وزن",
+                goalFitness: "لياقة بدنية العامة",
+                lblPlan: "مدة الاشتراك",
+                plan1: "شهر واحد",
+                plan2: "شهرين",
+                plan3: "3 أشهر",
+                plan6: "6 أشهر",
+                plan12: "سنة كاملة",
+                lblPhoto: "صورة شخصية / التقدم (اختياري)",
+                welcomeMsg: "أهلاً بك",
+                logoutBtn: "خروج",
+                subCardTitle: "تفاصيل اشتراكك",
+                startDateLbl: "تاريخ الاشتراك:",
+                endDateLbl: "تاريخ انتهاء الاشتراك:",
+                dietTitle: "النظام الغذائي",
+                workoutTitle: "نظام التمرين",
+                coachNotesTitle: "ملاحظات الكابتن",
+                aiCalcTitle: "حاسبة السعرات والماكروز واستبدال الوجبات",
+                foodInputLbl: "اكتب الطعام/الشراب المأكول",
+                calcBtn: "حساب السعرات",
+                proteinLbl: "بروتين",
+                carbsLbl: "كارب",
+                fatsLbl: "دهون",
+                calsLbl: "سعرات",
+                swapTitle: "تبديل وجبة غير مفضلة",
+                swapInputLbl: "الوجبة المراد استبدالها",
+                swapBtn: "اقتراح بديل بنفس القيم",
+                myNotesTitle: "ملاحظاتي للكابتن",
+                permNoteLbl: "ملاحظة دائمة",
+                dailyNoteLbl: "ملاحظة اليومية (شرح عن يومك الرياضي)",
+                saveNotesBtn: "حفظ الملاحظات",
+                adminPanelTitle: "لوحة تحكم الكابتن روماني",
+                subscribersListTitle: "قائمة المشتركين (اضغط على الاسم لعرض التفاصيل)",
+                langText: "English"
+            },
+            en: {
+                connectWithUs: "Connect:",
+                authTitle: "Member Login / Register",
+                tabLogin: "Login",
+                tabRegister: "New Account",
+                tabAdmin: "Captain Login",
+                lblPhone: "Phone Number",
+                lblPassword: "Password",
+                btnLogin: "Login",
+                btnRegister: "Submit Subscription",
+                adminEmailLbl: "Captain Email",
+                adminLoginBtn: "Admin Login",
+                lblRegName: "Full Name",
+                lblRegPhone: "Phone Number (Username)",
+                lblRegPass: "Password",
+                lblGender: "Gender",
+                optMale: "Male",
+                optFemale: "Female",
+                lblAge: "Age (Years)",
+                lblHeight: "Height (cm)",
+                lblWeight: "Weight (kg)",
+                lblGoal: "Training Goal",
+                goalLoss: "Weight Loss",
+                goalMuscle: "Muscle Gain",
+                goalWeightGain: "Weight Gain",
+                goalFitness: "General Fitness",
+                lblPlan: "Subscription Duration",
+                plan1: "1 Month",
+                plan2: "2 Months",
+                plan3: "3 Months",
+                plan6: "6 Months",
+                plan12: "1 Year",
+                lblPhoto: "Personal / Progress Photo (Optional)",
+                welcomeMsg: "Welcome",
+                logoutBtn: "Logout",
+                subCardTitle: "Subscription Details",
+                startDateLbl: "Subscription Date:",
+                endDateLbl: "Expiration Date:",
+                dietTitle: "Diet Plan",
+                workoutTitle: "Workout Plan",
+                coachNotesTitle: "Coach Notes",
+                aiCalcTitle: "AI Macros & Meal Swapper Calculator",
+                foodInputLbl: "Enter food/drink consumed",
+                calcBtn: "Calculate Macros",
+                proteinLbl: "Protein",
+                carbsLbl: "Carbs",
+                fatsLbl: "Fats",
+                calsLbl: "Calories",
+                swapTitle: "Swap Undesired Meal",
+                swapInputLbl: "Meal to Swap",
+                swapBtn: "Suggest Equal Alternative",
+                myNotesTitle: "My Notes to Coach",
+                permNoteLbl: "Permanent Note",
+                dailyNoteLbl: "Daily Note (Training recap)",
+                saveNotesBtn: "Save Notes",
+                adminPanelTitle: "Captain Romany Admin Panel",
+                subscribersListTitle: "Subscribers List (Click name to view details)",
+                langText: "عربي"
+            }
+        };
+
+        async function fetchSubscribersFromCloud() {
+            try {
+                const { data, error } = await supabaseClient.from('subscribers').select('*');
+                if (error) {
+                    console.error("Supabase fetch error details:", error);
+                    return [];
+                }
+                return data || [];
+            } catch (err) {
+                console.error("Network or Client Error:", err);
+                return [];
+            }
+        }
+
+        async function saveSubscriberToCloud(userObj) {
+            try {
+                const { error } = await supabaseClient.from('subscribers').upsert([userObj], { onConflict: 'phone' });
+                if (error) {
+                    alert("خطأ في حفظ البيانات: " + error.message);
+                    return false;
+                }
+                return true;
+            } catch (err) {
+                alert("خطأ غير متوقع: " + err.message);
+                return false;
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+
+            const t = translations[currentLang];
+            document.querySelectorAll("[data-translate]").forEach(el => {
+                const key = el.getAttribute("data-translate");
+                if(t[key]) el.innerText = t[key];
+            });
+            document.getElementById("langText").innerText = t.langText;
+        }
+
+        function switchAuthMode(mode) {
+            document.querySelectorAll(".nav-tabs .tab-btn").forEach(b => b.classList.remove("active"));
+            document.getElementById("loginForm").classList.add("hidden");
+            document.getElementById("registerForm").classList.add("hidden");
+            document.getElementById("adminLoginForm").classList.add("hidden");
+
+            if(mode === 'login') {
+                document.getElementById("tabLogin").classList.add("active");
+                document.getElementById("loginForm").classList.remove("hidden");
+            } else if(mode === 'register') {
+                document.getElementById("tabRegister").classList.add("active");
+                document.getElementById("registerForm").classList.remove("hidden");
+            } else {
+                document.getElementById("tabAdmin").classList.add("active");
+                document.getElementById("adminLoginForm").classList.remove("hidden");
+            }
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day} / ${month} / ${year}`;
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById("regSubmitBtn");
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ سحابياً...";
+
+            const phone = document.getElementById("regPhone").value.trim();
+            const pass = document.getElementById("regPassword").value.trim();
+
+            const users = await fetchSubscribersFromCloud();
+            if(users.some(u => String(u.phone).trim() === phone)) {
+                alert("رقم الموبايل مسجل بالفعل مسبقاً!");
+                btn.disabled = false;
+                btn.innerText = "تقديم طلب الاشتراك";
+                return;
+            }
+
+            const monthsCount = parseInt(document.getElementById("regPlan").value);
+            const startDateObj = new Date();
+            const endDateObj = new Date();
+            endDateObj.setMonth(startDateObj.getMonth() + monthsCount);
+
+            const fileInput = document.getElementById("regPhoto");
+
+            const finalize = async (imgBase64) => {
+                const newUser = {
+                    id: "sub_" + Date.now(),
+                    name: document.getElementById("regName").value.trim(),
+                    phone: phone,
+                    password: pass,
+                    gender: document.getElementById("regGender").value,
+                    age: parseInt(document.getElementById("regAge").value),
+                    height: parseInt(document.getElementById("regHeight").value),
+                    weight: parseInt(document.getElementById("regWeight").value),
+                    goal: document.getElementById("regGoal").value,
+                    planMonths: monthsCount,
+                    startDate: formatDate(startDateObj),
+                    endDate: formatDate(endDateObj),
+                    photo: imgBase64 || "",
+                    diet: "",
+                    workout: "",
+                    coachNotes: "",
+                    permNote: "",
+                    dailyNote: ""
+                };
+
+                const saved = await saveSubscriberToCloud(newUser);
+                btn.disabled = false;
+                btn.innerText = "تقديم طلب الاشتراك";
+
+                if(saved) {
+                    alert("تم تقديم طلب الاشتراك بنجاح أونلاين!");
+                    document.getElementById("loginPhone").value = phone;
+                    document.getElementById("loginPassword").value = pass;
+                    switchAuthMode('login');
+                }
+            };
+
+            if(fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) { finalize(evt.target.result); };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                await finalize("");
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById("loginSubmitBtn");
+            btn.disabled = true;
+            btn.innerText = "جاري التحقق...";
+
+            const phone = document.getElementById("loginPhone").value.trim();
+            const pass = document.getElementById("loginPassword").value.trim();
+
+            const users = await fetchSubscribersFromCloud();
+            
+            btn.disabled = false;
+            btn.innerText = "دخول";
+
+            const user = users.find(u => String(u.phone).trim() === phone && String(u.password).trim() === pass);
+
+            if(user) {
+                currentUser = user;
+                showMemberDashboard();
+            } else {
+                alert("رقم الموبايل أو كلمة السر غير صحيحة! تأكد من البيانات المسجلة.");
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById("adminEmail").value.trim();
+            const pass = document.getElementById("adminPassword").value.trim();
+
+            if(email === "romany@admin.com" && pass === "admin123") {
+                showAdminDashboard();
+            } else {
+                alert("بيانات دخول الكابتن غير صحيحة!");
+            }
+        }
+
+        function showMemberDashboard() {
+            document.getElementById("authSection").classList.add("hidden");
+            document.getElementById("memberDashboard").classList.remove("hidden");
+            document.getElementById("memberNameDisplay").innerText = currentUser.name;
+
+            document.getElementById("memberStartDate").innerText = currentUser.startDate;
+            document.getElementById("memberEndDate").innerText = currentUser.endDate;
+
+            document.getElementById("dietContent").innerHTML = currentUser.diet || "لم يقم الكابتن بإضافة النظام بعد.";
+            document.getElementById("workoutContent").innerHTML = currentUser.workout || "لم يقم الكابتن بإضافة التمرين بعد.";
+            document.getElementById("coachNotesContent").innerText = currentUser.coachNotes || "لا توجد ملاحظات حالياً.";
+            document.getElementById("permNote").value = currentUser.permNote || "";
+            document.getElementById("dailyNote").value = currentUser.dailyNote || "";
+        }
+
+        function showAdminDashboard() {
+            document.getElementById("authSection").classList.add("hidden");
+            document.getElementById("adminDashboard").classList.remove("hidden");
+            renderAdminList();
+        }
+
+        function toggleSubscriberBox(id) {
+            const body = document.getElementById(`subBody_${id}`);
+            if(body) body.classList.toggle("hidden");
+        }
+
+        async function renderAdminList() {
+            const container = document.getElementById("adminSubscribersList");
+            container.innerHTML = "<div class='loading-spinner'><i class='fas fa-spinner fa-spin'></i> جاري جلب المشتركين سحابياً...</div>";
+
+            const users = await fetchSubscribersFromCloud();
+            container.innerHTML = "";
+
+            if(users.length === 0) {
+                container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>لا توجد طلبات اشتراك مسجلة حالياً.</p>";
+                return;
+            }
+
+            users.forEach((u, idx) => {
+                const uId = u.id || ('idx_' + idx);
+                const box = document.createElement("div");
+                box.className = "subscriber-box";
+                box.innerHTML = `
+                    <div class="subscriber-header" onclick="toggleSubscriberBox('${uId}')">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            ${u.photo ? `<img src="${u.photo}" class="img-preview">` : '<i class="fas fa-user-circle" style="font-size:2.5rem; color:var(--accent-yellow);"></i>'}
+                            <div>
+                                <span style="font-size:1.1rem; font-weight:bold; color:var(--accent-yellow);">${u.name}</span>
+                                <div style="font-size:0.9rem; color:#25D366; font-weight:bold;"><i class="fas fa-phone-alt"></i> ${u.phone}</div>
+                            </div>
+                        </div>
+                        <div style="text-align:left;">
+                            <span style="font-size:0.85rem; color:#aaa;">ينتهي في: <b style="color:var(--accent-yellow);">${u.endDate}</b></span>
+                            <i class="fas fa-chevron-down" style="margin-right:8px;"></i>
+                        </div>
+                    </div>
+                    <div id="subBody_${uId}" class="subscriber-body hidden">
+                        <div class="info-group">
+                            <h4 style="color:var(--accent-yellow); margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">بيانات المشترك</h4>
+                            <div class="info-row"><span>رقم الموبايل:</span> <b style="color:#25D366;">${u.phone}</b></div>
+                            <div class="info-row"><span>النوع:</span> <b>${u.gender === 'male' ? 'ذكر' : 'أنثى'}</b></div>
+                            <div class="info-row"><span>السن:</span> <b>${u.age} سنة</b></div>
+                            <div class="info-row"><span>الطول / الوزن:</span> <b>${u.height} سم / ${u.weight} كجم</b></div>
+                            <div class="info-row"><span>الهدف:</span> <b>${u.goal}</b></div>
+                            <div class="info-row"><span>تاريخ الاشتراك:</span> <b style="color:#25D366;">${u.startDate}</b></div>
+                            <div class="info-row" style="border-bottom:none;"><span>تاريخ الانتهاء:</span> <b style="color:var(--accent-yellow);">${u.endDate} (${u.planMonths} شهر)</b></div>
+                        </div>
+                        
+                        <div class="info-group">
+                            <h4 style="color:var(--accent-yellow); margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">البرامج المخصصة</h4>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label>النظام الغذائي (كتابة / لينك / PDF):</label>
+                                <textarea id="diet_${uId}" rows="3">${u.diet || ''}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>نظام التمرين (كتابة / لينك / PDF):</label>
+                                <textarea id="workout_${uId}" rows="3">${u.workout || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <h4 style="color:var(--accent-yellow); margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">الملاحظات والإدارة</h4>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label>ملاحظات الكابتن للمتدرب:</label>
+                                <textarea id="notes_${uId}" rows="2">${u.coachNotes || ''}</textarea>
+                            </div>
+                            <div style="font-size:0.85rem; color:#ccc; background:#111; padding:8px; border-radius:4px; margin-bottom:10px;">
+                                <b>ملاحظة المتدرب الدائمة:</b> ${u.permNote || 'لا يوجد'}<br>
+                                <b>ملاحظة اليومية:</b> ${u.dailyNote || 'لا يوجد'}
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn btn-accent" style="flex:1; padding:8px;" onclick="saveUserDataByAdmin('${u.phone}')">حفظ التعديلات</button>
+                                <button class="btn btn-danger" style="padding:8px;" onclick="deleteUser('${u.phone}')">حذف المشترك</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(box);
+            });
+        }
+
+        async function saveUserDataByAdmin(phone) {
+            let users = await fetchSubscribersFromCloud();
+            let user = users.find(u => String(u.phone).trim() === String(phone).trim());
+            if(user) {
+                const uId = user.id || 0;
+                user.diet = document.getElementById(`diet_${uId}`).value;
+                user.workout = document.getElementById(`workout_${uId}`).value;
+                user.coachNotes = document.getElementById(`notes_${uId}`).value;
+                const success = await saveSubscriberToCloud(user);
+                if(success) alert("تم حفظ التعديلات سحابياً بنجاح!");
+            }
+        }
+
+        async function deleteUser(phone) {
+            if(confirm("هل أنت متأكد من حذف هذا المشترك نهائياً؟")) {
+                const { error } = await supabaseClient.from('subscribers').delete().eq('phone', String(phone).trim());
+                if(error) {
+                    alert("خطأ أثناء الحذف: " + error.message);
+                } else {
+                    renderAdminList();
+                }
+            }
+        }
+
+        async function saveMemberNotes() {
+            if(currentUser) {
+                currentUser.permNote = document.getElementById("permNote").value;
+                currentUser.dailyNote = document.getElementById("dailyNote").value;
+                const success = await saveSubscriberToCloud(currentUser);
+                if(success) alert("تم حفظ ملاحظاتك للكابتن سحابياً بنجاح!");
+            }
+        }
+
+        function calculateMacros() {
+            const input = document.getElementById("foodInput").value.toLowerCase();
+            let p = 0, c = 0, f = 0, cal = 0;
+
+            if(input.includes("دجاج") || input.includes("chicken")) { p += 31; f += 3.6; cal += 165; }
+            if(input.includes("أرز") || input.includes("rice")) { c += 28; p += 2.7; cal += 130; }
+            if(input.includes("بيض") || input.includes("egg")) { p += 13; f += 11; cal += 155; }
+            if(input.includes("لحم") || input.includes("meat")) { p += 26; f += 15; cal += 250; }
+
+            if(p === 0 && c === 0 && f === 0) { p = 22; c = 35; f = 9; cal = 290; }
+
+            document.getElementById("valProtein").innerText = p + "g";
+            document.getElementById("valCarbs").innerText = c + "g";
+            document.getElementById("valFats").innerText = f + "g";
+            document.getElementById("valCalories").innerText = cal + " kcal";
+        }
+
+        function swapMeal() {
+            const input = document.getElementById("swapInput").value.toLowerCase();
+            let swap = "";
+
+            if(input.includes("بيض")) swap = "البديل المقترح: 100 جرام جبن قريش أو 100 جرام تونة مصفاة من الزيت بنفس القيم تقريباً.";
+            else if(input.includes("دجاج") || input.includes("فراخ")) swap = "البديل المقترح: 120 جرام سمك فيليه مشوي أو 110 جرام لحم أحمر مشوي.";
+            else if(input.includes("أرز")) swap = "البديل المقترح: 150 جرام بطاطس مسلوقة أو 120 جرام مكرونة مسلوقة.";
+            else swap = "البديل المقترح: 100 جرام جبن قريش + طبق سلطة خضراء مع ملعقة زيت زيتون.";
+
+            document.getElementById("swapResult").innerText = swap;
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById("memberDashboard").classList.add("hidden");
+            document.getElementById("adminDashboard").classList.add("hidden");
+            document.getElementById("authSection").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
